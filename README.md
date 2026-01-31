@@ -4,15 +4,15 @@
 <br />
 <div align="center">
 
-  <h2 align="center">Shovel knight: Shovel of Hope</h2>
+  <h2 align="center">Marching Cubes</h2>
 
   <p align="center">
-    Shovel knight is a  platformer inspired by 8-bit games. With simple controls and memorable soundtracks and fun levels.
+    Marching cubes is an algorithm for extracting a polygonal mesh of an isosurface from a three-dimensional discrete scalar field (the elements of which are sometimes called voxels).
     <br />
-    <strong>Original game : Shovel knight: Shovel of Hope </strong>
-    <a href="https://en.wikipedia.org/wiki/Shovel_Knight"><strong>General info »</strong></a>
+    <strong>Marching Cubes </strong>
+    <a href="https://en.wikipedia.org/wiki/Marching_cubes"><strong>General info »</strong></a>
     ·
-    <a href="https://www.youtube.com/watch?v=BD2pqcLmu3c"><strong>Youtube video »<strong></a>
+    <a href="https://www.youtube.com/watch?v=M3iI2l0ltbE"><strong>Youtube video as reference »<strong></a>
     <br />
     <br />
   </p>
