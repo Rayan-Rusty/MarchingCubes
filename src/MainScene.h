@@ -17,9 +17,14 @@ private:
 	void Draw() const;
 
 
+	void initNoise();
+
 	//variables
 	Camera3D worldCamera{ 0 };
 	std::vector<Voxel> voxelGrid;
 
 	int m_Resolution;
+	const int m_NoiseSize{16};
+	std::vector<std::vector<std::vector<float>>> gNoise;
+
 };

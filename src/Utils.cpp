@@ -1,5 +1,6 @@
 ﻿#include "Utils.h"
 #include "raymath.h"
+#include "FastNoiseLite.h"
 float Utils::Density(float x, float y, float z)
 {
 
@@ -31,4 +32,33 @@ float Utils::IndexD(float x, float y, float z, int size, const std::vector<Voxel
 float Utils::IndexD(Vector3 xyz, float size, const std::vector<Voxel>& voxelGrid)
 {
 	return IndexD(xyz.x, xyz.y, xyz.z, size, voxelGrid);
+}
+
+float Utils::DensityRandom(float x, float y, float z)
+{
+
+    static  FastNoiseLite noise;
+    static bool init{ false };
+
+    if (!init)
+    {
+        noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+        noise.SetFrequency(0.04f);
+        noise.SetFractalOctaves(4);
+
+        noise.SetFractalGain(0.5f);
+        noise.SetFractalLacunarity(2.0f);
+        init = true;
+    }
+    float n = noise.GetNoise(x, y, z); // 3D noise [-1,1]
+    float height = n * 6.0f;           // scale noise
+
+
+
+    return y - height;
+}
+
+float Utils::Noise(float x, float z)
+{
+    return sinf(x * 0.15f) * cosf(z * 0.15);
 }
