@@ -10,6 +10,5 @@ namespace Utils
 
 	float IndexD(Vector3 xyz , float size, const std::vector<Voxel>& voxelGrid);
 
-	float DensityRandom(float x, float y, float z);
-	float Noise(float x, float z);
+
 }

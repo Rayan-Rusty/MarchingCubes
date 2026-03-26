@@ -4,7 +4,7 @@
 #include "raymath.h"
 
 MainScene::MainScene()
-    :m_Resolution{20}
+    :m_Resolution{64}
 {
     DisableCursor();
 
@@ -25,7 +25,7 @@ MainScene::MainScene()
     for (int y = 0; y < m_Resolution; y++)
     for (int x = 0; x < m_Resolution; x++)
     {
-        float scalar = Utils::DensityRandom(float(x - half), float(y - half), float(z - half));
+        float scalar = Utils::Density(float(x - half), float(y - half), float(z - half));
         Color col = PURPLE;
 
         if (scalar <= 0) col = RED;
@@ -199,12 +199,15 @@ void MainScene::Update(float deltaTime)
 
 void MainScene::initNoise()
 {
-    gNoise.resize(m_NoiseSize * m_NoiseSize * m_NoiseSize);
+    //int NoiseSize{ 32 };
+    //gNoise.resize(NoiseSize * NoiseSize * NoiseSize);
 
-    // Fill random values
-    for (int x = 0; x < m_NoiseSize; x++)
-    for (int y = 0; y < m_NoiseSize; y++)
-    for (int z = 0; z < m_NoiseSize; z++)
-    gNoise[x][y][z] = ((float)GetRandomValue(0, 10000) / 5000.f) - 1.f;
+    //for (int z = 0; z < NoiseSize; z++)
+    //for (int y = 0; y < NoiseSize; y++)
+    //for (int x = 0; x < NoiseSize; x++)
+    //{        
+    //    int i = x + y * NoiseSize + z * NoiseSize * NoiseSize;
+    //    gNoise[i] = ((float)GetRandomValue(0, 10000) / 5000.f) - 1.f;
+    //}
 
 }
