@@ -8,9 +8,9 @@ float Utils::Density(float x, float y, float z)
 
     constexpr float half = 10.f;
 
-    constexpr float radius{ 4.f };
+    constexpr float radius{ 14.f };
     float scalar{ x * x + y * y + z * z - radius * radius };
-    return y;
+    return scalar;
 
     //
     // float side = fabs(x) + fabs(z) + y - h;  // slanted sides
