@@ -2,39 +2,40 @@
 #include "Utils.h"
 #include "Tables.h"
 #include "raymath.h"
+#include <thread>
+#include <iostream>
 
 MainScene::MainScene()
     :m_Resolution{64}
 {
     DisableCursor();
 
-    worldCamera.position = Vector3{ -3.f , 4.f , 10.f };
-    worldCamera.target = Vector3{0.0f,0.0f,0.0f };
-    worldCamera.up = Vector3{ 0.f , 1.f, 0.f };
-    worldCamera.fovy = 45.f;
-    worldCamera.projection = CAMERA_PERSPECTIVE;
-    
-     
+    auto start = std::chrono::high_resolution_clock::now();
+    ThreadingInitCpu();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
 
-    int half = m_Resolution / 2;
-    voxelGrid.reserve(m_Resolution * m_Resolution * m_Resolution);
+    std::cout << "Time Threading: " << elapsed.count() << " seconds\n";
 
-
-
-    for (int z = 0; z < m_Resolution; z++)
-    for (int y = 0; y < m_Resolution; y++)
-    for (int x = 0; x < m_Resolution; x++)
-    {
-        float scalar = Utils::Density(float(x - half), float(y - half), float(z - half));
-        Color col = PURPLE;
-
-        if (scalar <= 0) col = RED;
-        voxelGrid.push_back({ scalar, col });
-    }
-
+    // start = std::chrono::high_resolution_clock::now();
+    // InitCPU();
+    // end = std::chrono::high_resolution_clock::now();
+    // elapsed = end - start;
+    //
+    // std::cout << "Time Without Threading: " << elapsed.count() << " seconds\n";
 
 }
 
+
+void MainScene::InitGPU()
+{
+
+}
+
+void MainScene::DrawGPU() const
+{
+;
+}
 
 MainScene::~MainScene()
 {
@@ -59,6 +60,96 @@ void MainScene::Run(float deltaTime)
 
 void MainScene::Draw() const
 {
+    DrawCPU();
+}
+
+
+
+void MainScene::Update(float deltaTime)
+{
+    UpdateCamera(&worldCamera , CAMERA_FREE);
+}
+
+
+void MainScene::initNoise()
+{
+
+}
+
+void MainScene::ThreadingInitCpu()
+{
+
+    worldCamera.position = Vector3{ -3.f , 4.f , 10.f };
+    worldCamera.target = Vector3{0.0f,0.0f,0.0f };
+    worldCamera.up = Vector3{ 0.f , 1.f, 0.f };
+    worldCamera.fovy = 45.f;
+    worldCamera.projection = CAMERA_PERSPECTIVE;
+
+
+    unsigned int nThreads {std::thread::hardware_concurrency()};
+    int chunkSize  = m_Resolution / nThreads ;
+
+
+    int half = m_Resolution / 2;
+    voxelGrid.resize(m_Resolution * m_Resolution * m_Resolution);
+
+
+
+    {
+        std::vector<std::jthread> threads;
+        for (int i = 0; i < nThreads; i++)
+        {
+            int zStart{i * chunkSize};
+            int zEnd{zStart + chunkSize};
+
+            threads.emplace_back(Utils::LoadChunks,zStart , zEnd ,m_Resolution,std::ref(voxelGrid));
+        }
+    }
+
+
+
+
+
+}
+
+
+void MainScene::InitCPU()
+{
+
+    worldCamera.position = Vector3{ -3.f , 4.f , 10.f };
+    worldCamera.target = Vector3{0.0f,0.0f,0.0f };
+    worldCamera.up = Vector3{ 0.f , 1.f, 0.f };
+    worldCamera.fovy = 45.f;
+    worldCamera.projection = CAMERA_PERSPECTIVE;
+
+
+
+
+
+    int half = m_Resolution / 2;
+    voxelGrid.reserve(m_Resolution * m_Resolution * m_Resolution);
+
+
+
+    for (int z = 0; z < m_Resolution; z++)
+        for (int y = 0; y < m_Resolution; y++)
+            for (int x = 0; x < m_Resolution; x++)
+            {
+                int worldX{ x - half};
+                int worldY{y - half};
+                int worldZ{ z - half };
+
+                float scalar = Utils::Density(float(worldX), float(worldY), float(worldZ));
+                Color col = PURPLE;
+
+                if (scalar <= 0) col = RED;
+                voxelGrid.push_back({ scalar, col });
+            }
+
+}
+
+void MainScene::DrawCPU() const
+{
 
 
 
@@ -81,15 +172,9 @@ void MainScene::Draw() const
 
 
 
-        Vector3 pos
-        { 
-            float(x - half) * scale,
-            float(y - half)* scale,
-            float(z - half) * scale 
-        };
 
         //8 sides in the Cell
-        Vector3 cornersCell[8]; 
+        Vector3 cornersCell[8];
         for (int i = 0; i < 8; ++i)
         {
             cornersCell[i] =
@@ -97,7 +182,7 @@ void MainScene::Draw() const
                 {
                     (x + corners[i].x - half) * scale,
                     (y + corners[i].y - half) * scale,
-                    (z + corners[i].z - half) * scale 
+                    (z + corners[i].z - half) * scale
                 };
         }
 
@@ -128,7 +213,7 @@ void MainScene::Draw() const
         Vector3 vertexList[12]{};
 
 
-        
+
         for (size_t i = 0; i < 12; i++)
         {
             if (edges & (1 << i))
@@ -163,51 +248,19 @@ void MainScene::Draw() const
         index++;
     }
 
-
-    // DEBUG: draw voxelGrid as tiny cubes
-    index = 0;
-
-    for (int z = 0; z < m_Resolution; z++)
-    for (int y = 0; y < m_Resolution; y++)
-    for (int x = 0; x < m_Resolution; x++)
-    {
-        Vector3 p =
-        {
-            float(x - half ),
-            float(y ),
-            float(z - half )
-        };
-
-
-        //DrawCube(p, 0.1f, 0.1f, 0.1f, voxelGrid[index].color);
-
-        index++;
-    }
-
-    Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
-    DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
-
-}
-
-
-
-void MainScene::Update(float deltaTime)
-{
-    UpdateCamera(&worldCamera , CAMERA_FREE);
-}
-
-
-void MainScene::initNoise()
-{
-    //int NoiseSize{ 32 };
-    //gNoise.resize(NoiseSize * NoiseSize * NoiseSize);
-
-    //for (int z = 0; z < NoiseSize; z++)
-    //for (int y = 0; y < NoiseSize; y++)
-    //for (int x = 0; x < NoiseSize; x++)
-    //{        
-    //    int i = x + y * NoiseSize + z * NoiseSize * NoiseSize;
-    //    gNoise[i] = ((float)GetRandomValue(0, 10000) / 5000.f) - 1.f;
-    //}
+    //
+    // // DEBUG: draw voxelGrid as tiny cubes
+    // index = 0;
+    //
+    // for (int z = 0; z < m_Resolution; z++)
+    // for (int y = 0; y < m_Resolution; y++)
+    // for (int x = 0; x < m_Resolution; x++)
+    // {
+    //
+    //     index++;
+    // }
+    //
+    // Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
+    // DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
 
 }

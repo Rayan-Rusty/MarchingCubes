@@ -19,12 +19,22 @@ private:
 
 	void initNoise();
 
+	void InitGPU();
+	void InitCPU();
+	void ThreadingInitCpu();
+
+	void DrawCPU() const;
+	void DrawGPU() const;
 	//variables
 	Camera3D worldCamera{ 0 };
 	std::vector<Voxel> voxelGrid;
 
 	int m_Resolution;
 
+
+	Shader m_Shader;
+	Mesh m_cubeMesh;
+	Model m_Model;
 
 
 };
