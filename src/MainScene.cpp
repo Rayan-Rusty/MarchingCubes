@@ -6,7 +6,7 @@
 #include <iostream>
 
 MainScene::MainScene()
-    :m_Resolution{32}
+    :m_Resolution{16}
 {
     DisableCursor();
 
@@ -26,16 +26,6 @@ MainScene::MainScene()
 
 }
 
-
-void MainScene::InitGPU()
-{
-
-}
-
-void MainScene::DrawGPU() const
-{
-;
-}
 
 MainScene::~MainScene()
 {
@@ -60,7 +50,10 @@ void MainScene::Run(float deltaTime)
 
 void MainScene::Draw() const
 {
-    DrawCPU();
+    constexpr Vector3 pos1 {0.0 , 0.0 , 0.0 };
+    constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
+    Utils::DrawChunks(m_Resolution , pos1 , voxelGrid);
+    Utils::DrawChunks(m_Resolution , pos2 , voxelGrid2);
 }
 
 
@@ -93,7 +86,8 @@ void MainScene::ThreadingInitCpu()
     int half = m_Resolution / 2;
     voxelGrid.resize(m_Resolution * m_Resolution * m_Resolution);
 
-
+    constexpr Vector3 pos1 {0.0 , 0.0 , 0.0 };
+    constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
 
     {
         std::vector<std::jthread> threads;
@@ -102,9 +96,23 @@ void MainScene::ThreadingInitCpu()
             int zStart{i * chunkSize};
             int zEnd{zStart + chunkSize};
 
-            threads.emplace_back(Utils::LoadChunks,zStart , zEnd ,m_Resolution,std::ref(voxelGrid));
+            threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, pos1 ,std::ref(voxelGrid));
         }
     }
+
+    voxelGrid2.resize(m_Resolution * m_Resolution * m_Resolution);
+
+    {
+         std::vector<std::jthread> threads2;
+         for (int i = 0; i < nThreads; i++)
+         {
+             int zStart{i * chunkSize};
+             int zEnd{zStart + chunkSize};
+
+             threads2.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, pos2 ,std::ref(voxelGrid2));
+         }
+     }
+
 
 
 
