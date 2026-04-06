@@ -6,7 +6,7 @@
 #include <iostream>
 
 MainScene::MainScene()
-    :m_Resolution{64}
+    :m_Resolution{32}
 {
     DisableCursor();
 
@@ -154,7 +154,7 @@ void MainScene::DrawCPU() const
 
 
 
-    DrawGrid(20, 1.0f);
+    DrawGrid(m_Resolution, 1.0f);
 
     int size{ m_Resolution };
     int index{ 0 };
@@ -250,17 +250,18 @@ void MainScene::DrawCPU() const
 
     //
     // // DEBUG: draw voxelGrid as tiny cubes
-    // index = 0;
+    index = 0;
     //
-    // for (int z = 0; z < m_Resolution; z++)
-    // for (int y = 0; y < m_Resolution; y++)
-    // for (int x = 0; x < m_Resolution; x++)
-    // {
+    for (int z = 0; z < m_Resolution; z++)
+    for (int y = 0; y < m_Resolution; y++)
+    for (int x = 0; x < m_Resolution; x++)
+    {
     //
-    //     index++;
-    // }
+       index++;
+    }
     //
-    // Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
-    // DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
+    Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
+    DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
 
 }
+
