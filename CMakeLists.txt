@@ -23,6 +23,13 @@ FetchContent_MakeAvailable(fastnoiselite)
 add_executable(MarchingCubes src/main.cpp "src/MainScene.h" "src/MainScene.cpp" "src/Utils.h" "src/Utils.cpp" "src/DataTypes.h" "src/Tables.h" "src/Tables.cpp")
 
 
+add_custom_command(TARGET MarchingCubes POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/Resources
+        $<TARGET_FILE_DIR:MarchingCubes>/Resources
+)
+
+
 target_link_libraries(MarchingCubes raylib)
 
 target_include_directories(MarchingCubes PRIVATE ${fastnoiselite_SOURCE_DIR}/Cpp)
