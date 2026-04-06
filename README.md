@@ -11,10 +11,24 @@
     <br />
     <strong>Marching Cubes </strong>
     <a href="https://en.wikipedia.org/wiki/Marching_cubes"><strong>General info »</strong></a>
-    ·
-    <a href="https://www.youtube.com/watch?v=M3iI2l0ltbE"><strong>Youtube video as reference »<strong></a>
-    <br />
-    <br />
+    <a href="https://www.youtube.com/watch?v=M3iI2l0ltbE"><strong>Youtube video as reference »</strong></a>
+  </p>
+<br />
+</div>
+<div align="center">
+
+## My version
+<p align="center">
+
+
+This section gives a clear and detailed overview of what I did for this project specifically.
+
+### The minimum I will most certainly develop:
+the basic algorithm to generate meshes based on implicit functions.
+using threading to load it into chunks 
+
+
+
   </p>
 </div>
 
