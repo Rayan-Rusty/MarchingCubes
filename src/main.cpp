@@ -10,8 +10,8 @@ int main(void)
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    constexpr int screenWidth = 1280;
-    constexpr int screenHeight = 720;
+    constexpr int screenWidth = 1600;
+    constexpr int screenHeight = 900;
 
     InitWindow(screenWidth, screenHeight, "raylib Marching Cubes");
 
