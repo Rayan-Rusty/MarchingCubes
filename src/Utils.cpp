@@ -36,16 +36,16 @@ float Utils::IndexD(Vector3 xyz, float size, const std::vector<Voxel>& voxelGrid
 }
 
 
-void Utils::LoadChunks(int zStart, int zEnd , int total , std::vector<Voxel>& voxelGrid)
+void Utils::LoadChunks(int zStart, int zEnd , int total, const Vector3& ChunkPos , std::vector<Voxel>& voxelGrid)
 {
     int half = total / 2;
     for (int z = zStart; z < zEnd; z++)
     for (int y = 0; y < total; y++)
     for (int x = 0; x < total; x++)
     {
-        int worldX = x - half;
-        int worldY = y - half;
-        int worldZ = z - half;
+        int worldX = x + ChunkPos.x - half;
+        int worldY = y + ChunkPos.y - half;
+        int worldZ = z + ChunkPos.z - half;
 
         float scalar = Utils::Density(
             float(worldX), float(worldY), float(worldZ));
@@ -58,7 +58,7 @@ void Utils::LoadChunks(int zStart, int zEnd , int total , std::vector<Voxel>& vo
     }
 }
 
-void Utils::DrawChunks(int resolution, std::vector<Voxel> &voxelGrid)
+void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vector<Voxel> &voxelGrid)
 {
 
 
@@ -90,9 +90,9 @@ void Utils::DrawChunks(int resolution, std::vector<Voxel> &voxelGrid)
             cornersCell[i] =
                 Vector3
                 {
-                    (x + corners[i].x - half) * scale,
-                    (y + corners[i].y - half) * scale,
-                    (z + corners[i].z - half) * scale
+                    (x + corners[i].x + ChunkPos.x * resolution - half) * scale,
+                    (y + corners[i].y + ChunkPos.y * resolution - half) * scale,
+                    (z + corners[i].z + ChunkPos.z * resolution - half) * scale
                 };
         }
 
@@ -162,15 +162,12 @@ void Utils::DrawChunks(int resolution, std::vector<Voxel> &voxelGrid)
     // // DEBUG: draw voxelGrid as tiny cubes
     index = 0;
     //
-    for (int z = 0; z < resolution; z++)
-    for (int y = 0; y < resolution; y++)
-    for (int x = 0; x < resolution; x++)
+    for (int i = 0; i < 2; i++)
     {
-    //
-       index++;
+        Vector3 cubePosition{float(resolution * i), ChunkPos.y, ChunkPos.z};
+        DrawCubeWires(cubePosition, resolution, resolution, resolution, PURPLE);
+
     }
     //
-    Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
-    DrawCubeWires(cubePosition, resolution, resolution, resolution, PURPLE);
 
 }
