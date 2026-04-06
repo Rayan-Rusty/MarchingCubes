@@ -1,14 +1,17 @@
 #include "raylib.h"
 #include "MainScene.h"
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main(void)
 {
+
+
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    constexpr int screenWidth = 1280;
+    constexpr int screenHeight = 720;
 
     InitWindow(screenWidth, screenHeight, "raylib Marching Cubes");
 
