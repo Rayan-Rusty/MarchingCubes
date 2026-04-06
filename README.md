@@ -26,9 +26,7 @@ This section gives a clear and detailed overview of what I did for this project 
 ### The minimum I will most certainly develop:
 the basic algorithm to generate meshes based on implicit functions.
 using threading to load it into chunks 
-
-
-
+![img_1.png](Resources/img_1.png)
   </p>
 </div>
 
