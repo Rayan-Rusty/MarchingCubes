@@ -62,10 +62,15 @@ void MainScene::Draw() const
     constexpr Vector3 pos1 {0.0 , 0.0 , 0.0 };
     constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
 
-    for (size_t i = 0; i < m_Chunks.size(); ++i)
     {
-        Utils::DrawChunks(m_Resolution, m_Positions[i], m_Chunks[i]);
+        //for future threading
+        for (size_t i = 0; i < m_Chunks.size(); ++i)
+        {
+            Utils::DrawChunks(m_Resolution, m_Positions[i], m_Chunks[i]);
+        }
     }
+
+
 
     //DrawGrid(m_Resolution * 2, 1.0f);
 
@@ -73,7 +78,7 @@ void MainScene::Draw() const
     for (int i = 0; i < m_Chunks.size(); i++)
     {
         Vector3 cubePosition{m_Positions[i].x * m_Resolution, m_Positions[i].y* m_Resolution, m_Positions[i].z * m_Resolution};
-        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
+        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, GREEN);
 
     }
 
@@ -121,8 +126,8 @@ void MainScene::ThreadingInitCpu()
 
         for (int c = 0; c < m_Positions.size(); c++)
         {
-            auto& chunk = m_Chunks[c];
-            chunk.resize(m_Resolution * m_Resolution * m_Resolution);
+            //auto& chunk = m_Chunks[c];
+            m_Chunks[c].resize(m_Resolution * m_Resolution * m_Resolution);
 
             std::vector<std::jthread> threads;
 
@@ -131,7 +136,7 @@ void MainScene::ThreadingInitCpu()
                 int zStart{i * chunkSize};
                 int zEnd{zStart + chunkSize};
 
-                threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, m_Positions[c] ,std::ref(chunk));
+                threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, m_Positions[c] ,std::ref(m_Chunks[c]));
             }
         }
     }

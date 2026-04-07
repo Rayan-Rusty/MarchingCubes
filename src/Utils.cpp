@@ -150,7 +150,7 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
             DrawLine3D(v0, v1, BLACK);
             DrawLine3D(v1, v2, BLACK);
             DrawLine3D(v2, v0, BLACK);
-            DrawTriangle3D(v0, v2, v1, GREEN);
+            DrawTriangle3D(v0, v2, v1, PURPLE);
         }
 
 
