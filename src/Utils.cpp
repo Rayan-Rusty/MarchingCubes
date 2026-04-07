@@ -64,7 +64,6 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
 
 
 
-    DrawGrid(resolution, 1.0f);
 
     int size{ resolution };
     int index{ 0 };
@@ -162,12 +161,7 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
     // // DEBUG: draw voxelGrid as tiny cubes
     index = 0;
     //
-    for (int i = 0; i < 2; i++)
-    {
-        Vector3 cubePosition{float(resolution * i), ChunkPos.y, ChunkPos.z};
-        DrawCubeWires(cubePosition, resolution, resolution, resolution, PURPLE);
 
-    }
     //
 
 }
