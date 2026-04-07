@@ -67,6 +67,17 @@ void MainScene::Draw() const
         Utils::DrawChunks(m_Resolution, m_Positions[i], m_Chunks[i]);
     }
 
+    //DrawGrid(m_Resolution * 2, 1.0f);
+
+
+    for (int i = 0; i < m_Chunks.size(); i++)
+    {
+        Vector3 cubePosition{m_Positions[i].x * m_Resolution, m_Positions[i].y* m_Resolution, m_Positions[i].z * m_Resolution};
+        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, PURPLE);
+
+    }
+
+
     // Utils::DrawChunks(m_Resolution , pos1 , voxelGrid);
     // Utils::DrawChunks(m_Resolution , pos2 , voxelGrid2);
 }
@@ -105,6 +116,7 @@ void MainScene::ThreadingInitCpu()
     constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
 
     m_Chunks.resize(m_Positions.size());
+
     {
 
         for (int c = 0; c < m_Positions.size(); c++)
