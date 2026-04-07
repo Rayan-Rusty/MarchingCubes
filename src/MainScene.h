@@ -27,8 +27,11 @@ private:
 
 	//variables
 	Camera3D worldCamera{ 0 };
+	std::vector<std::vector<Voxel>> m_Chunks;
 	std::vector<Voxel> voxelGrid;
 	std::vector<Voxel> voxelGrid2;
+
+	std::vector<Vector3> m_Positions;
 
 	int m_Resolution;
 

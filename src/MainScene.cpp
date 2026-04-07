@@ -10,6 +10,15 @@ MainScene::MainScene()
 {
     DisableCursor();
 
+    m_Positions = {
+        {0.f, 0.f, 0.f},
+        {1.f, 0.f, 0.f},
+        {0.f, 0.f, 1.f},
+        {1.f, 0.f, 1.f}
+    };
+
+
+
     auto start = std::chrono::high_resolution_clock::now();
     ThreadingInitCpu();
     auto end = std::chrono::high_resolution_clock::now();
@@ -52,8 +61,14 @@ void MainScene::Draw() const
 {
     constexpr Vector3 pos1 {0.0 , 0.0 , 0.0 };
     constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
-    Utils::DrawChunks(m_Resolution , pos1 , voxelGrid);
-    Utils::DrawChunks(m_Resolution , pos2 , voxelGrid2);
+
+    for (size_t i = 0; i < m_Chunks.size(); ++i)
+    {
+        Utils::DrawChunks(m_Resolution, m_Positions[i], m_Chunks[i]);
+    }
+
+    // Utils::DrawChunks(m_Resolution , pos1 , voxelGrid);
+    // Utils::DrawChunks(m_Resolution , pos2 , voxelGrid2);
 }
 
 
@@ -89,32 +104,43 @@ void MainScene::ThreadingInitCpu()
     constexpr Vector3 pos1 {0.0 , 0.0 , 0.0 };
     constexpr Vector3 pos2 {1.f , 0.0 , 0.0 };
 
+    m_Chunks.resize(m_Positions.size());
     {
-        std::vector<std::jthread> threads;
-        for (int i = 0; i < nThreads; i++)
-        {
-            int zStart{i * chunkSize};
-            int zEnd{zStart + chunkSize};
 
-            threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, pos1 ,std::ref(voxelGrid));
+        for (int c = 0; c < m_Positions.size(); c++)
+        {
+            auto& chunk = m_Chunks[c];
+            chunk.resize(m_Resolution * m_Resolution * m_Resolution);
+
+            std::vector<std::jthread> threads;
+
+            for (int i = 0; i < nThreads; i++)
+            {
+                int zStart{i * chunkSize};
+                int zEnd{zStart + chunkSize};
+
+                threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, m_Positions[c] ,std::ref(chunk));
+            }
         }
     }
 
-    voxelGrid2.resize(m_Resolution * m_Resolution * m_Resolution);
-
-    {
-         std::vector<std::jthread> threads2;
-         for (int i = 0; i < nThreads; i++)
-         {
-             int zStart{i * chunkSize};
-             int zEnd{zStart + chunkSize};
-
-             threads2.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, pos2 ,std::ref(voxelGrid2));
-         }
-     }
-
-
-
+    //
+    // voxelGrid2.resize(m_Resolution * m_Resolution * m_Resolution);
+    //
+    // {
+    //      std::vector<std::jthread> threads2;
+    //      for (int i = 0; i < nThreads; i++)
+    //      {
+    //          int zStart{i * chunkSize};
+    //          int zEnd{zStart + chunkSize};
+    //
+    //          threads2.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, pos2 ,std::ref(voxelGrid2));
+    //      }
+    //  }
+    //
+    //
+    // m_Chunks.push_back(voxelGrid);
+    // m_Chunks.push_back(voxelGrid2);
 
 
 
