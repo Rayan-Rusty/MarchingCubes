@@ -58,7 +58,19 @@ void Utils::LoadChunks(int zStart, int zEnd , int total, const Vector3& ChunkPos
     }
 }
 
-void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vector<Voxel> &voxelGrid)
+
+int Utils::CubeIndex(float *ds[])
+{
+    int cubeIndex{ 0 };
+    for (size_t i = 0; i < 8; i++)
+        if (*ds[i] < 0.f)
+            cubeIndex |= (1 << i); // bitshifting
+
+    return cubeIndex;
+
+}
+
+void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vector<Voxel> &voxelGrid, std::vector<Triangle>& outTriangles)
 {
 
 
@@ -106,10 +118,7 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
         float d7 = Utils::IndexD(x, y + 1, z + 1, size, voxelGrid);
 
         float* ds[8] = { &d0,&d1,&d2, &d3, &d4, &d5, &d6, &d7 };
-        int cubeIndex{ 0 };
-        for (size_t i = 0; i < 8; i++)
-            if (*ds[i] < 0.f)
-                cubeIndex |= (1 << i); // bitshifting
+        int cubeIndex{CubeIndex(ds)};
 
         int edges = edgeTable[cubeIndex];
 
@@ -146,11 +155,8 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
             Vector3 v1 = vertexList[triTable[cubeIndex][i + 1]];
             Vector3 v2 = vertexList[triTable[cubeIndex][i + 2]];
 
+            outTriangles.push_back({v0, v1 , v2});
 
-            DrawLine3D(v0, v1, BLACK);
-            DrawLine3D(v1, v2, BLACK);
-            DrawLine3D(v2, v0, BLACK);
-            DrawTriangle3D(v0, v2, v1, PURPLE);
         }
 
 

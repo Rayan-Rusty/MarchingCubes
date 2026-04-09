@@ -19,6 +19,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     MainScene scene;
+
     while (!WindowShouldClose())
     {
         float deltaTime = GetFrameTime();

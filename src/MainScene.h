@@ -14,10 +14,12 @@ private:
 
 	//functions
 	void Update(float deltaTime);
-	void Draw() const;
+	void Draw();
 
 
-	void initNoise();
+	void GenerateMesh();
+	void RenderMesh() const;
+
 
 
 	void InitCPU();
@@ -29,16 +31,13 @@ private:
 	Camera3D worldCamera{ 0 };
 	std::vector<std::vector<Voxel>> m_Chunks;
 	std::vector<Voxel> voxelGrid;
-	std::vector<Voxel> voxelGrid2;
-
+	std::vector<std::vector<Triangle>> m_Triangles;
 	std::vector<Vector3> m_Positions;
 
 	int m_Resolution;
 
 
-	Shader m_Shader;
-	Mesh m_cubeMesh;
-	Model m_Model;
 
+	bool m_Initialized{false};
 
 };

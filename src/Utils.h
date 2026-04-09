@@ -11,7 +11,7 @@ namespace Utils
 	float IndexD(Vector3 xyz , float size, const std::vector<Voxel>& voxelGrid);
 
 	void LoadChunks(int zStart , int zEnd , int total,const Vector3& ChunkPos, std::vector<Voxel>& voxelGrid);
+	int CubeIndex(float *ds[]);
 
-
-	void DrawChunks(int resolution , const Vector3& ChunkPos ,const std::vector<Voxel>& voxelGrid);
+	void DrawChunks(int resolution , const Vector3& ChunkPos ,const std::vector<Voxel>& voxelGrid , std::vector<Triangle>& outTriangles);
 }
