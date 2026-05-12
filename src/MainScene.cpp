@@ -1,31 +1,38 @@
 #include "MainScene.h"
 #include "Utils.h"
-#include "Tables.h"
-#include "raymath.h"
 #include <thread>
 #include <iostream>
 
+#include "raymath.h"
+
 MainScene::MainScene()
-    :m_Resolution{64}
+    :m_Resolution{16}
 {
     DisableCursor();
 
+    Utils::noiseMap.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    Utils::noiseMap.SetFrequency(0.15f);
+    Utils::noiseMap.SetFractalOctaves(3);
+    Utils::noiseMap.SetFractalType(FastNoiseLite::FractalType_FBm);
 
 
-
-    for (int width = 0; width < 2;width++)
-    for (int depth = 0; depth < 2; depth++)
-    for (int height = 0; height < 2; height++)
+    constexpr int amnt{4};
+    for (int width = 0; width <amnt;width++)
+    for (int depth = 0; depth < amnt; depth++)
+    for (int height = 0; height < amnt; height++)
     {
-        m_Positions.push_back(Vector3{float(width) ,float(height) ,float(depth) });
+        m_Positions.push_back(Vector3{static_cast<float>(width) ,static_cast<float>(height) ,static_cast<float>(depth) });
     }
 
 
 
 
     auto start = std::chrono::high_resolution_clock::now();
+
     ThreadingInitCpu();
     GenerateMesh();
+    SetMeshDataIntoModels();
+
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 
@@ -37,6 +44,8 @@ MainScene::MainScene()
 
 MainScene::~MainScene()
 {
+    for (auto& model : m_Models)
+        UnloadModel(model);
 
 }
 
@@ -56,7 +65,7 @@ void MainScene::Run(float deltaTime)
 }
 
 
-void MainScene::Draw()
+void MainScene::Draw() const
 {
     RenderMesh();
 }
@@ -66,51 +75,69 @@ void MainScene::GenerateMesh()
 {
     m_Triangles.clear();
     m_Triangles.resize(m_Chunks.size());
+    m_Meshes.resize(m_Chunks.size());
+    m_MeshData.resize(m_Chunks.size());
+
     std::vector<std::jthread> threads;
-    //for future threading
-     threads.reserve(m_Chunks.size());
+    threads.reserve(m_Chunks.size());
 
-     for (size_t i = 0; i < m_Chunks.size(); ++i)
-     {
-         threads.emplace_back([this, i]()
-         {
-             Utils::DrawChunks(m_Resolution , m_Positions[i] , m_Chunks[i] , m_Triangles[i]);
-         });
-     }
+        for (size_t i = 0; i < m_Chunks.size(); ++i)
+        {
+            threads.emplace_back([this, i]()
+            {
+                Utils::DrawChunks(m_Resolution , m_Positions[i] , m_Chunks[i] , std::ref(m_MeshData[i]));
+            });
+        }
 
-     threads.clear();
-
-
-    // for (size_t i = 0; i < m_Chunks.size(); ++i)
-    // {
-    //      Utils::DrawChunks(m_Resolution, m_Positions[i], m_Chunks[i] , m_Triangles[i]);
-    // }
+    threads.clear();
 
 }
 
 
-void MainScene::RenderMesh() const
+void MainScene::SetMeshDataIntoModels()
 {
-    for (const auto& mesh : m_Triangles)
+    m_Models.resize(m_MeshData.size());
+
+    for (size_t i = 0; i < m_MeshData.size(); i++)
     {
-        for (const auto& tri : mesh)
-        {
-            DrawLine3D(tri.v0, tri.v1, BLACK);
-            DrawLine3D(tri.v1, tri.v2, BLACK);
-            DrawLine3D(tri.v2, tri.v0, BLACK);
-            DrawTriangle3D(tri.v0, tri.v2, tri.v1, PURPLE);
-        }
+        Mesh mesh = {0};
+
+        mesh.vertexCount = m_MeshData[i].verts.size() / 3;
+        mesh.triangleCount = mesh.vertexCount / 3;
+
+        mesh.vertices = (float*)MemAlloc(m_MeshData[i].verts.size() * sizeof(float));
+        memcpy(mesh.vertices, m_MeshData[i].verts.data(), m_MeshData[i].verts.size() * sizeof(float));
+
+        mesh.normals = (float*)MemAlloc(m_MeshData[i].normals.size() * sizeof(float));
+        memcpy(mesh.normals, m_MeshData[i].normals.data(), m_MeshData[i].normals.size() * sizeof(float));
+
+        UploadMesh(&mesh, false);
+
+        m_Models[i] = LoadModelFromMesh(mesh);
     }
 
-    for (int i = 0; i < m_Chunks.size(); i++)
+
+
+}
+
+
+void MainScene::RenderMesh() const {
+    for (const auto& model : m_Models)
+    {
+        DrawModel(model, Vector3Zero(), 1.0f, GREEN);
+        DrawModelWires(model, Vector3Zero(), 1.0f, BLACK);
+    }
+
+
+    for (int i = 0; i < m_Models.size(); i++)
     {
         Vector3 cubePosition{m_Positions[i].x * m_Resolution, m_Positions[i].y* m_Resolution, m_Positions[i].z * m_Resolution};
-        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, GREEN);
+        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, WHITE);
 
     }
 
-}
 
+}
 
 void MainScene::Update(float deltaTime)
 {
@@ -160,14 +187,4 @@ void MainScene::ThreadingInitCpu()
 
 }
 
-
-void MainScene::InitCPU()
-{
-
-}
-
-void MainScene::DrawCPU() const
-{
-
-}
 
