@@ -5,13 +5,19 @@
 float Utils::Density(float x, float y, float z)
 {
 
-    float h = 4.0f;
+    // float h = 4.0f;
+    //
+    // constexpr float half = 10.f;
 
-    constexpr float half = 10.f;
+    constexpr float groundLevel{ 5.f };
 
     constexpr float radius{ 5.f };
-    float scalar{ x * x + y * y + z * z - radius * radius };
+    float scalar{ y - groundLevel };
+    float noise = noiseMap.GetNoise(x, y, z);
+    scalar -= noise * 2.0f;
+
     return scalar;
+
 
     //
     // float side = fabs(x) + fabs(z) + y - h;  // slanted sides
@@ -43,12 +49,12 @@ void Utils::LoadChunks(int zStart, int zEnd , int total, const Vector3& ChunkPos
     for (int y = 0; y < total; y++)
     for (int x = 0; x < total; x++)
     {
-        int worldX = x + ChunkPos.x - half;
-        int worldY = y + ChunkPos.y - half;
-        int worldZ = z + ChunkPos.z - half;
+        int worldX = x + ChunkPos.x * (total - 1) - half;
+        int worldY = y + ChunkPos.y * (total - 1)- half;
+        int worldZ = z + ChunkPos.z * (total - 1)- half;
 
         float scalar = Utils::Density(
-            float(worldX), float(worldY), float(worldZ));
+            static_cast<float>(worldX), static_cast<float>(worldY), static_cast<float>(worldZ));
 
         int index = x
                   + y * total
@@ -70,7 +76,7 @@ int Utils::CubeIndex(float *ds[])
 
 }
 
-void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vector<Voxel> &voxelGrid, std::vector<Triangle>& outTriangles)
+void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vector<Voxel> &voxelGrid,  ChunkMeshData&  outMesh)
 {
 
 
@@ -80,10 +86,10 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
     int size{ resolution };
     int index{ 0 };
     int half{ resolution / 2 };
-    constexpr float scale{ 1.f };
 
 
-
+    std::vector<float> verts;
+    std::vector<float> normals;
 
 
     for (int z = 0; z < resolution - 1; z++)
@@ -94,16 +100,18 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
 
 
 
+
         //8 sides in the Cell
         Vector3 cornersCell[8];
         for (int i = 0; i < 8; ++i)
         {
+            constexpr float scale{ 1.f };
             cornersCell[i] =
                 Vector3
                 {
-                    (x + corners[i].x + ChunkPos.x * resolution - half) * scale,
-                    (y + corners[i].y + ChunkPos.y * resolution - half) * scale,
-                    (z + corners[i].z + ChunkPos.z * resolution - half) * scale
+                    ((x + corners[i].x) + ChunkPos.x * (resolution - 1) - half) * scale,
+                    ((y + corners[i].y) + ChunkPos.y * (resolution - 1)- half) * scale,
+                    ((z + corners[i].z) + ChunkPos.z * (resolution - 1) - half) * scale
                 };
         }
 
@@ -149,25 +157,46 @@ void Utils::DrawChunks(int resolution, const Vector3& ChunkPos, const std::vecto
         }
 
 
+
+
         for (int i = 0; triTable[cubeIndex][i] != -1; i += 3)
         {
             Vector3 v0 = vertexList[triTable[cubeIndex][i]];
             Vector3 v1 = vertexList[triTable[cubeIndex][i + 1]];
             Vector3 v2 = vertexList[triTable[cubeIndex][i + 2]];
+            //outMesh.push_back({v0, v1 , v2});
 
-            outTriangles.push_back({v0, v1 , v2});
+
+            Vector3 n =
+                Vector3Normalize(
+                  Vector3CrossProduct(
+                    Vector3Subtract(v1,v0),
+                    Vector3Subtract(v2,v0)
+                  ));
+
+            Vector3 tri[3] = { v0, v2, v1 };
+
+            for(int k=0;k<3;k++)
+            {
+                verts.push_back(tri[k].x);
+                verts.push_back(tri[k].y);
+                verts.push_back(tri[k].z);
+
+                normals.push_back(n.x);
+                normals.push_back(n.y);
+                normals.push_back(n.z);
+            }
 
         }
 
-
-        index++;
     }
 
-    //
-    // // DEBUG: draw voxelGrid as tiny cubes
-    index = 0;
-    //
 
-    //
 
+    outMesh.verts = std::move(verts);
+    outMesh.normals = std::move(normals);
+
+
+
+    index++;
 }
