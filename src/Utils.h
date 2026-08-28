@@ -11,7 +11,7 @@ namespace Utils
 	
 	float Density(float x, float y, float z);
 
-	float IndexD(float x, float y, float z, int size, const std::vector<Voxel>& voxelGrid);
+	float IndexD(int x, int y, int z, int size, const std::vector<Voxel>& voxelGrid);
 
 	float IndexD(Vector3 xyz , float size, const std::vector<Voxel>& voxelGrid);
 
