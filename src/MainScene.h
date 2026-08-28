@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MARCHINGCUBES_MAINSCENE_H
+#define MARCHINGCUBES_MAINSCENE_H
 #include "raylib.h"
 #include <vector>
 #include "DataTypes.h"
@@ -44,3 +45,4 @@ private:
 
 
 };
+#endif //MARCHINGCUBES_MAINSCENE_H

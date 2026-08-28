@@ -46,7 +46,6 @@ MainScene::~MainScene()
 {
     for (auto& model : m_Models)
         UnloadModel(model);
-
 }
 
 
@@ -55,7 +54,7 @@ void MainScene::Run(float deltaTime)
 
     Update(deltaTime);
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(Color{0, 0, 150});
     DrawFPS(10, 10);
     BeginMode3D(worldCamera);
     Draw();
@@ -97,46 +96,55 @@ void MainScene::GenerateMesh()
 void MainScene::SetMeshDataIntoModels()
 {
     m_Models.resize(m_MeshData.size());
-
     for (size_t i = 0; i < m_MeshData.size(); i++)
     {
         Mesh mesh = {0};
+        auto& data = m_MeshData[i];
+        mesh.vertexCount = static_cast<int>(data.verts.size() / 3);
+        mesh.triangleCount = mesh.vertexCount / 3; // still assumes non-indexed
 
-        mesh.vertexCount = m_MeshData[i].verts.size() / 3;
-        mesh.triangleCount = mesh.vertexCount / 3;
+        size_t vertBytes = data.verts.size() * sizeof(float);
+        mesh.vertices = static_cast<float*>(MemAlloc(vertBytes));
+        if (!mesh.vertices)
+        {
+            /* handle OOM */ continue;
+        }
+        memcpy(mesh.vertices, data.verts.data(), vertBytes);
 
-        mesh.vertices = (float*)MemAlloc(m_MeshData[i].verts.size() * sizeof(float));
-        memcpy(mesh.vertices, m_MeshData[i].verts.data(), m_MeshData[i].verts.size() * sizeof(float));
+        size_t normBytes = data.normals.size() * sizeof(float);
+        mesh.normals = static_cast<float*>(MemAlloc(normBytes));
+        if (!mesh.normals)
+        {
+            /* handle OOM */ continue;
+        }
+        memcpy(mesh.normals, data.normals.data(), normBytes);
 
-        mesh.normals = (float*)MemAlloc(m_MeshData[i].normals.size() * sizeof(float));
-        memcpy(mesh.normals, m_MeshData[i].normals.data(), m_MeshData[i].normals.size() * sizeof(float));
+
+        if (data.normals.size() != data.verts.size())
+        {
+            std::cerr << "Mismatched vert/normal count for chunk " << i << "\n";
+        }
 
         UploadMesh(&mesh, false);
-
         m_Models[i] = LoadModelFromMesh(mesh);
     }
-
-
-
 }
 
 
-void MainScene::RenderMesh() const {
+void MainScene::RenderMesh() const
+{
     for (const auto& model : m_Models)
     {
         DrawModel(model, Vector3Zero(), 1.0f, GREEN);
         DrawModelWires(model, Vector3Zero(), 1.0f, BLACK);
     }
 
-
+    auto res = static_cast<float>(m_Resolution);
     for (int i = 0; i < m_Models.size(); i++)
     {
-        Vector3 cubePosition{m_Positions[i].x * m_Resolution, m_Positions[i].y* m_Resolution, m_Positions[i].z * m_Resolution};
-        DrawCubeWires(cubePosition, m_Resolution, m_Resolution, m_Resolution, WHITE);
-
+        Vector3 cubePosition{m_Positions[i].x * res, m_Positions[i].y* res, m_Positions[i].z * res};
+        DrawCubeWires(cubePosition, res, res, res, WHITE);
     }
-
-
 }
 
 void MainScene::Update(float deltaTime)
@@ -161,22 +169,18 @@ void MainScene::ThreadingInitCpu()
 
 
     voxelGrid.resize(m_Resolution * m_Resolution * m_Resolution);
-
     m_Chunks.resize(m_Positions.size());
 
     {
-
         for (int c = 0; c < m_Positions.size(); c++)
         {
             m_Chunks[c].resize(m_Resolution * m_Resolution * m_Resolution);
-
             std::vector<std::jthread> threads;
 
             for (int i = 0; i < nThreads; i++)
             {
                 int zStart{i * chunkSize};
                 int zEnd{zStart + chunkSize};
-
                 threads.emplace_back(Utils::LoadChunks,zStart , zEnd  ,m_Resolution, m_Positions[c] ,std::ref(m_Chunks[c]));
             }
         }
